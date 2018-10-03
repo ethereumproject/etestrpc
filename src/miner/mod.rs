@@ -117,7 +117,7 @@ pub fn make_state<P: Patch>(genesis_accounts: Vec<(SecretKey, U256)>) -> MinerSt
                 value: balance,
                 input: Rc::new(Vec::new()),
                 nonce: U256::zero(),
-            }, HeaderParams::from(&genesis.header), &[]);
+            }, &HeaderParams::from(&genesis.header), &[]);
             let mut accounts = Vec::new();
             for account in vm.accounts() {
                 accounts.push(account.clone());
@@ -169,9 +169,9 @@ pub fn mine_one<P: Patch>(state: Arc<Mutex<MinerState>>, address: Address) {
 
     for transaction in transactions.clone() {
         let transaction_hash = transaction.rlp_hash();
-        let valid = state.stateful_mut().to_valid::<P>(transaction).unwrap();
+        let valid = state.stateful_mut().to_valid::<P>(&transaction).unwrap();
         let vm: SeqTransactionVM<P> = {
-            let vm = state.stateful_mut().call(valid, HeaderParams::from(&current_block.header),
+            let vm = state.stateful_mut().call(valid, &HeaderParams::from(&current_block.header),
                                &block_hashes);
             let mut accounts = Vec::new();
             for account in vm.accounts() {

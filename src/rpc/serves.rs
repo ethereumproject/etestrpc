@@ -306,7 +306,7 @@ impl<P: 'static + Patch + Send> EthereumRPC for MinerEthereumRPC<P> {
         let (valid, transaction) = {
             let stateful = state.stateful();
             let transaction = to_signed_transaction(&state, transaction, &stateful)?;
-            let valid = stateful.to_valid::<P>(transaction.clone())?;
+            let valid = stateful.to_valid::<P>(&transaction.clone())?;
 
             (valid, transaction)
         };
@@ -324,7 +324,7 @@ impl<P: 'static + Patch + Send> EthereumRPC for MinerEthereumRPC<P> {
 
         {
             let stateful = state.stateful();
-            stateful.to_valid::<P>(transaction.clone())?;
+            stateful.to_valid::<P>(&transaction.clone())?;
         }
 
         let hash = state.append_pending_transaction(transaction);
@@ -343,7 +343,7 @@ impl<P: 'static + Patch + Send> EthereumRPC for MinerEthereumRPC<P> {
         let block = state.get_block_by_number(block);
 
         let vm: SeqTransactionVM<P> = stateful.call(
-            valid, HeaderParams::from(&block.header),
+            valid, &HeaderParams::from(&block.header),
             &state.get_last_256_block_hashes());
 
         Ok(Bytes(vm.out().into()))
@@ -360,7 +360,7 @@ impl<P: 'static + Patch + Send> EthereumRPC for MinerEthereumRPC<P> {
         let block = state.get_block_by_number(block);
 
         let vm: SeqTransactionVM<P> = stateful.call(
-            valid, HeaderParams::from(&block.header),
+            valid, &HeaderParams::from(&block.header),
             &state.get_last_256_block_hashes());
 
         Ok(Hex(vm.used_gas()))
@@ -600,9 +600,9 @@ impl<P: 'static + Patch + Send> DebugRPC for MinerDebugRPC<P> {
         let mut stateful: MemoryStateful<'static> = state.stateful_at(last_block.header.state_root);
         for other_transaction in &block.transactions {
             if other_transaction != &transaction {
-                let valid = stateful.to_valid::<P>(transaction.clone())?;
+                let valid = stateful.to_valid::<P>(&transaction.clone())?;
                 let _: SeqTransactionVM<P> =
-                    stateful.execute::<_, P>(valid, HeaderParams::from(&block.header), &last_hashes);
+                    stateful.execute::<_, P>(valid, &HeaderParams::from(&block.header), &last_hashes);
             } else {
                 break;
             }

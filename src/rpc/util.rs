@@ -359,7 +359,7 @@ pub fn replay_transaction<P: Patch>(
     stateful: &MemoryStateful<'static>, transaction: Transaction, block: &Block,
     last_hashes: &[H256], config: &RPCTraceConfig
 ) -> Result<(Vec<RPCStep>, SeqTransactionVM<P>), Error> {
-    let valid = stateful.to_valid::<P>(transaction)?;
+    let valid = stateful.to_valid::<P>(&transaction)?;
     let mut vm = SeqTransactionVM::<P>::new(valid, HeaderParams::from(&block.header));
     let mut steps = Vec::new();
     let mut last_gas = Gas::zero();
